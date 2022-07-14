@@ -4235,6 +4235,17 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var time = setTimeout(function(){}, 3000);\r",
+									"// var t = new Date().getTime();\r",
+									"// while (new Date().getTime() < t + 3000);"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
