@@ -1,10 +1,14 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.IncorrectItemException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.service.ItemMapper;
+import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -40,8 +44,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto get(@PathVariable long itemId) {
-        return ItemMapper.toItemDto(itemServiceImpl.get(itemId));
+    public ItemBookingDto get(@PathVariable long itemId,
+                              @RequestHeader("X-Sharer-User-Id") long userId) {
+        return itemServiceImpl.getItemById(itemId, userId);
     }
 
     @DeleteMapping("/{itemId}")
@@ -51,15 +56,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllUsersItems(@RequestHeader("X-Sharer-User-Id") long userId) {
-        List<Item> items = itemServiceImpl.getAllUsersItems(userId);
-        List<ItemDto> dtoItems = new ArrayList<>();
-
-        for (Item i : items) {
-            dtoItems.add(ItemMapper.toItemDto(i));
-        }
-
-        return dtoItems;
+    public List<ItemBookingDto> getAllUsersItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+        return itemServiceImpl.getAllUsersItems(userId);
     }
 
     @GetMapping("/search")
@@ -68,5 +66,13 @@ public class ItemController {
             return new ArrayList<>();
         }
         return itemServiceImpl.search(text.toLowerCase(Locale.ROOT)).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                    @PathVariable long itemId,
+                                    @Valid @RequestBody CommentDto commentDto) {
+
+        return itemServiceImpl.createComment(commentDto, itemId, userId);
     }
 }

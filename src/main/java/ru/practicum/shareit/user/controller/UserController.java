@@ -1,8 +1,11 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.IncorrectUserException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserMapper;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -23,7 +26,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto get(@PathVariable long userId) {
-        return UserMapper.toUserDto(userService.get(userId));
+        return UserMapper.toUserDto(userService.getUserById(userId));
     }
 
     @PatchMapping("/{userId}")
