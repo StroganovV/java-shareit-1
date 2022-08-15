@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
-    UserService userService;
+    private UserService userService;
 
     @GetMapping
     public Collection<UserDto> getAll() {

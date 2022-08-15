@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.Constants;
 import ru.practicum.shareit.exceptions.IncorrectItemException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
@@ -20,10 +21,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 @AllArgsConstructor
 public class ItemController {
-    ItemService itemServiceImpl;
+    private ItemService itemServiceImpl;
 
     @PostMapping
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") long userId,
+    public ItemDto create(@RequestHeader(Constants.USER_ID_HEADER) long userId,
                           @Valid @RequestBody ItemDto itemDto) {
         if (itemDto.getName() == null || itemDto.getName().isBlank() || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
             throw new IncorrectItemException("Имя или описание заполнены неправильно");
@@ -36,27 +37,27 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") long userId,
+    public ItemDto update(@RequestHeader(Constants.USER_ID_HEADER) long userId,
                           @RequestBody ItemDto itemDto,
                           @PathVariable long itemId) {
-        Item item = ItemMapper.toItem(itemDto);
-        return ItemMapper.toItemDto(itemServiceImpl.update(userId, itemId, item));
+
+        return itemServiceImpl.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
     public ItemBookingDto get(@PathVariable long itemId,
-                              @RequestHeader("X-Sharer-User-Id") long userId) {
+                              @RequestHeader(Constants.USER_ID_HEADER) long userId) {
         return itemServiceImpl.getItemById(itemId, userId);
     }
 
     @DeleteMapping("/{itemId}")
-    public void delete(@RequestHeader("X-Sharer-User-Id") long userId,
+    public void delete(@RequestHeader(Constants.USER_ID_HEADER) long userId,
                        @PathVariable long itemId) {
         itemServiceImpl.delete(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemBookingDto> getAllUsersItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemBookingDto> getAllUsersItems(@RequestHeader(Constants.USER_ID_HEADER) long userId) {
         return itemServiceImpl.getAllUsersItems(userId);
     }
 
@@ -69,7 +70,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId,
+    public CommentDto createComment(@RequestHeader(Constants.USER_ID_HEADER) long userId,
                                     @PathVariable long itemId,
                                     @Valid @RequestBody CommentDto commentDto) {
 

@@ -23,10 +23,10 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    BookingRepository bookingRepository;
-    ItemRepository itemRepository;
-    UserService userService;
-    BookingMapper bookingMapper;
+    private BookingRepository bookingRepository;
+    private ItemRepository itemRepository;
+    private UserService userService;
+    private BookingMapper bookingMapper;
 
     @Override
     public List<Booking> getAllByBookerId(StateEnum state, long bookerId) {

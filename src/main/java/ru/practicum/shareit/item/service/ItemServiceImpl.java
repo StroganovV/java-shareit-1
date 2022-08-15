@@ -11,6 +11,7 @@ import ru.practicum.shareit.exceptions.NotAvailableException;
 import ru.practicum.shareit.exceptions.NotOwnerException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -27,11 +28,11 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    ItemRepository itemRepository;
-    CommentRepository commentRepository;
-    BookingRepository bookingRepository;
-    UserServiceImpl userService;
-    BookingMapper bookingMapper;
+    private ItemRepository itemRepository;
+    private CommentRepository commentRepository;
+    private BookingRepository bookingRepository;
+    private UserServiceImpl userService;
+    private BookingMapper bookingMapper;
 
     @Override
     public Item create(long userId, Item item) {
@@ -41,7 +42,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item update(long userId, long itemId, Item item) {
+    public ItemDto update(long userId, long itemId, ItemDto itemDto) {
+        Item item = ItemMapper.toItem(itemDto);
         Optional<Item> itemData = itemRepository.findById(itemId);
 
         if (itemData.isPresent()) {
@@ -63,7 +65,7 @@ public class ItemServiceImpl implements ItemService {
                 itemUpd.setAvailable(item.isAvailable());
             }
             itemRepository.save(itemUpd);
-            return itemUpd;
+            return ItemMapper.toItemDto(itemUpd);
         } else {
             throw new ItemNotFoundException("Вещь не найдена");
         }
