@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -88,8 +91,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemBookingDto> getAllUsersItems(long userId) {
-        return itemRepository.getAllByOwnerId(userId)
+    public List<ItemBookingDto> getAllUsersItems(long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
+        return itemRepository.getAllByOwnerId(userId, pageable)
                 .stream()
                 .map(i -> getItemBookingDtoWithBookingsAndComments(i, userId))
                 .sorted(Comparator.comparing(ItemBookingDto::getId))
@@ -97,13 +101,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> search(String text) { //Поиск вещи по наличию текста в имени или описании
-        return itemRepository.search(text);
+    public List<Item> search(String text, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id"));//Поиск вещи по наличию текста в имени или описании
+        return itemRepository.search(text, pageable);
     }
 
     private ItemBookingDto getItemBookingDtoWithBookingsAndComments(Item item, long userId) {
         ItemBookingDto getDto = ItemMapper.toItemBookingDto(item);
-        List<Booking> bookings = bookingRepository.getAllByItemIdOrderByCreatedDateDesc(item.getId());
+        List<Booking> bookings = bookingRepository.getAllByItemIdOrderByCreatedDesc(item.getId());
         if (bookings != null && bookings.size() > 0) {
             if (item.getOwnerId() == userId) {
                 getDto.setLastBooking(bookingMapper.toBookingDto(bookings.get(bookings.size() - 1)));

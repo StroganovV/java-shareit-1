@@ -22,7 +22,7 @@ public class Item {
     @Column(name = "owner_id")
     private Long ownerId;
     @Column(name = "request_id")
-    private Long request;
+    private Long requestId;
 
 
     public Boolean isAvailable() {

@@ -30,6 +30,6 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Type(type = "ru.practicum.shareit.booking.model.EnumTypePostgreSql")
     private BookingStatus status;
-    @Column(name = "created_date")
-    private LocalDateTime createdDate;
+    @Column(name = "created")
+    private LocalDateTime created;
 }

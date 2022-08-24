@@ -27,6 +27,12 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<?> handleBadRequest(final BadRequestException e) {
+        log.warn(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<?> handleDuplicatedEmail(final DuplicateEmailException e) {
         log.warn(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -46,6 +52,12 @@ public class ErrorHandler {
 
     @ExceptionHandler
     public ResponseEntity<?> handleBookingNotFoundException(final BookingNotFoundException e) {
+        log.warn(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleRequestNotFoundException(final RequestNotFoundException e) {
         log.warn(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }

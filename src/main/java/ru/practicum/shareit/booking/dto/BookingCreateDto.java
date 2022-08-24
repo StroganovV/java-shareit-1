@@ -20,5 +20,5 @@ public class BookingCreateDto {
     private Long itemId;
     private Long bookerId;
     private BookingStatus status;
-    private LocalDateTime createdTime = LocalDateTime.now();
+    private LocalDateTime created = LocalDateTime.now();
 }

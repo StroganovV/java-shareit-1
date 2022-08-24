@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingUpdDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -29,31 +32,33 @@ public class BookingServiceImpl implements BookingService {
     private BookingMapper bookingMapper;
 
     @Override
-    public List<Booking> getAllByBookerId(StateEnum state, long bookerId) {
+    public List<Booking> getAllByBookerId(StateEnum state, long bookerId, int from, int size) {
         userService.getUserById(bookerId);
         LocalDateTime now = LocalDateTime.now();
+        Pageable pageable = PageRequest.of(from/size, size, Sort.by("created"));
 
         switch (state) {
             case PAST:
-                return bookingRepository.findByBookerIdAndEndBeforeOrderByCreatedDateDesc(bookerId, now);
+                return bookingRepository.findByBookerIdAndEndBeforeOrderByCreatedDesc(bookerId, now, pageable);
             case WAITING:
-                return bookingRepository.findByBookerIdAndStatusOrderByCreatedDateDesc(bookerId, BookingStatus.WAITING);
+                return bookingRepository.findByBookerIdAndStatusOrderByCreatedDesc(bookerId, BookingStatus.WAITING, pageable);
             case FUTURE:
-                return bookingRepository.getFutureBookings(bookerId, now);
+                return bookingRepository.getFutureBookings(bookerId, now, pageable);
             case REJECTED:
-                return bookingRepository.findByBookerIdAndStatusOrderByCreatedDateDesc(bookerId, BookingStatus.REJECTED);
+                return bookingRepository.findByBookerIdAndStatusOrderByCreatedDesc(bookerId, BookingStatus.REJECTED, pageable);
             case CURRENT:
-                return bookingRepository.getCurrentBookings(bookerId, now);
+                return bookingRepository.getCurrentBookings(bookerId, now, pageable);
             default:
-                return bookingRepository.findByBookerIdOrderByCreatedDateDesc(bookerId);
+                return bookingRepository.findByBookerIdOrderByCreatedDesc(bookerId, pageable);
         }
     }
 
     @Override
-    public List<Booking> getAllWhereOwnerOfItems(StateEnum state, long ownerId) {
+    public List<Booking> getAllWhereOwnerOfItems(StateEnum state, long ownerId, int from, int size) {
         userService.getUserById(ownerId);
         List<Item> items = itemRepository.getAllByOwnerId(ownerId);
         LocalDateTime now = LocalDateTime.now();
+        Pageable pageable = PageRequest.of(from/size, size, Sort.by("created"));
 
         if (items == null || items.size() == 0) {
             return new ArrayList<>();
@@ -61,17 +66,17 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case PAST:
-                return bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByCreatedDateDesc(ownerId, now);
+                return bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByCreatedDesc(ownerId, now, pageable);
             case WAITING:
-                return bookingRepository.findByItemOwnerIdAndStatusOrderByCreatedDateDesc(ownerId, BookingStatus.WAITING);
+                return bookingRepository.findByItemOwnerIdAndStatusOrderByCreatedDesc(ownerId, BookingStatus.WAITING, pageable);
             case FUTURE:
-                return bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByCreatedDateDesc(ownerId, now);
+                return bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByCreatedDesc(ownerId, now, pageable);
             case REJECTED:
-                return bookingRepository.findByItemOwnerIdAndStatusOrderByCreatedDateDesc(ownerId, BookingStatus.REJECTED);
+                return bookingRepository.findByItemOwnerIdAndStatusOrderByCreatedDesc(ownerId, BookingStatus.REJECTED, pageable);
             case CURRENT:
-                return bookingRepository.findAllCurrentBookings(ownerId, now);
+                return bookingRepository.findAllCurrentBookings(ownerId, now, pageable);
             default:
-                return bookingRepository.getBookingsByItemOwnerIdOrderByCreatedDateDesc(ownerId);
+                return bookingRepository.getBookingsByItemOwnerIdOrderByCreatedDesc(ownerId, pageable);
         }
     }
 

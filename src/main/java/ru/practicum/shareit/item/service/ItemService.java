@@ -17,9 +17,9 @@ public interface ItemService {
 
     void delete(long userId, long itemId);
 
-    List<ItemBookingDto> getAllUsersItems(long userId);
+    List<ItemBookingDto> getAllUsersItems(long userId, int from, int size);
 
-    List<Item> search(String text);
+    List<Item> search(String text, int from, int size);
 
     CommentDto createComment(CommentDto commentDto, long itemId, long userId);
 }

@@ -57,16 +57,20 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemBookingDto> getAllUsersItems(@RequestHeader(Constants.USER_ID_HEADER) long userId) {
-        return itemServiceImpl.getAllUsersItems(userId);
+    public List<ItemBookingDto> getAllUsersItems(@RequestHeader(Constants.USER_ID_HEADER) long userId,
+                                                 @RequestParam(defaultValue = "0") int from,
+                                                 @RequestParam(defaultValue = "25") int size) {
+        return itemServiceImpl.getAllUsersItems(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
+    public List<ItemDto> search(@RequestParam String text,
+                                @RequestParam(defaultValue = "0") int from,
+                                @RequestParam(defaultValue = "25") int size) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemServiceImpl.search(text.toLowerCase(Locale.ROOT)).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return itemServiceImpl.search(text.toLowerCase(Locale.ROOT), from, size).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
     @PostMapping("/{itemId}/comment")
