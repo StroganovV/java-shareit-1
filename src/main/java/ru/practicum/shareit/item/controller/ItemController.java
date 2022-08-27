@@ -7,7 +7,6 @@ import ru.practicum.shareit.exceptions.IncorrectItemException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemMapper;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -33,7 +32,7 @@ public class ItemController {
         if (itemDto.getAvailable() == null) {
             throw new IncorrectItemException("Не заполнено поле доступности вещи");
         }
-        return ItemMapper.toItemDto(itemServiceImpl.create(userId, ItemMapper.toItem(itemDto)));
+        return itemServiceImpl.create(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
@@ -70,7 +69,7 @@ public class ItemController {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemServiceImpl.search(text.toLowerCase(Locale.ROOT), from, size).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return itemServiceImpl.search(text.toLowerCase(Locale.ROOT), from, size);
     }
 
     @PostMapping("/{itemId}/comment")

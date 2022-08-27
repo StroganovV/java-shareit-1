@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ItemService {
 
-    Item create(long userId, Item item);
+    ItemDto create(long userId, ItemDto itemDto);
 
     ItemDto update(long userId, long itemId, ItemDto itemDto);
 
@@ -19,7 +19,7 @@ public interface ItemService {
 
     List<ItemBookingDto> getAllUsersItems(long userId, int from, int size);
 
-    List<Item> search(String text, int from, int size);
+    List<ItemDto> search(String text, int from, int size);
 
     CommentDto createComment(CommentDto commentDto, long itemId, long userId);
 }

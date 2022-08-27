@@ -38,10 +38,11 @@ public class ItemServiceImpl implements ItemService {
     private BookingMapper bookingMapper;
 
     @Override
-    public Item create(long userId, Item item) {
+    public ItemDto create(long userId, ItemDto itemDto) {
+        Item item = ItemMapper.toItem(itemDto);
         userService.getUserById(userId);
         item.setOwnerId(userId);
-        return itemRepository.save(item);
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override
@@ -101,14 +102,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> search(String text, int from, int size) {
+    public List<ItemDto> search(String text, int from, int size) {
         Pageable pageable = PageRequest.of(from, size, Sort.by("id"));//Поиск вещи по наличию текста в имени или описании
-        return itemRepository.search(text, pageable);
+        return itemRepository.search(text, pageable).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
     private ItemBookingDto getItemBookingDtoWithBookingsAndComments(Item item, long userId) {
         ItemBookingDto getDto = ItemMapper.toItemBookingDto(item);
-        List<Booking> bookings = bookingRepository.getAllByItemIdOrderByCreatedDesc(item.getId());
+        List<Booking> bookings = bookingRepository.getAllByItemIdOrderByStartDesc(item.getId());
         if (bookings != null && bookings.size() > 0) {
             if (item.getOwnerId() == userId) {
                 getDto.setLastBooking(bookingMapper.toBookingDto(bookings.get(bookings.size() - 1)));

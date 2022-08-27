@@ -12,4 +12,8 @@ public class ItemRequestCreatedDto {
     private String description;
     private User requestor;
     private LocalDateTime created = LocalDateTime.now();
+
+    public ItemRequestCreatedDto(String description) {
+        this.description = description;
+    }
 }

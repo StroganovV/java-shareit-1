@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ItemRequestMapper {
     ItemRepository itemRepository;
+
     public ItemRequestDto toItemRequestDto(ItemRequest request) {
         ItemRequestDto dto = new ItemRequestDto();
         dto.setId(request.getId());

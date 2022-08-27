@@ -18,4 +18,8 @@ public class ItemRequestDto {
     private User requestor;
     private LocalDateTime created;
     private List<ItemDto> items;
+
+    public ItemRequestDto(String description) {
+        this.description = description;
+    }
 }

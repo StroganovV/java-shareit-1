@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingUpdDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -32,33 +33,40 @@ public class BookingServiceImpl implements BookingService {
     private BookingMapper bookingMapper;
 
     @Override
-    public List<Booking> getAllByBookerId(StateEnum state, long bookerId, int from, int size) {
+    public List<BookingUpdDto> getAllByBookerId(StateEnum state, long bookerId, int from, int size) {
         userService.getUserById(bookerId);
         LocalDateTime now = LocalDateTime.now();
-        Pageable pageable = PageRequest.of(from/size, size, Sort.by("created"));
+        Pageable pageable = PageRequest.of(from/size, size, Sort.by("start"));
+
 
         switch (state) {
             case PAST:
-                return bookingRepository.findByBookerIdAndEndBeforeOrderByCreatedDesc(bookerId, now, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findByBookerIdAndEndBeforeOrderByStartDesc(bookerId, now, pageable));
             case WAITING:
-                return bookingRepository.findByBookerIdAndStatusOrderByCreatedDesc(bookerId, BookingStatus.WAITING, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.WAITING, pageable));
             case FUTURE:
-                return bookingRepository.getFutureBookings(bookerId, now, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .getFutureBookings(bookerId, now, pageable));
             case REJECTED:
-                return bookingRepository.findByBookerIdAndStatusOrderByCreatedDesc(bookerId, BookingStatus.REJECTED, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.REJECTED, pageable));
             case CURRENT:
-                return bookingRepository.getCurrentBookings(bookerId, now, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .getCurrentBookings(bookerId, now, pageable));
             default:
-                return bookingRepository.findByBookerIdOrderByCreatedDesc(bookerId, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findByBookerIdOrderByStartDesc(bookerId, pageable));
         }
     }
 
     @Override
-    public List<Booking> getAllWhereOwnerOfItems(StateEnum state, long ownerId, int from, int size) {
+    public List<BookingUpdDto> getAllWhereOwnerOfItems(StateEnum state, long ownerId, int from, int size) {
         userService.getUserById(ownerId);
         List<Item> items = itemRepository.getAllByOwnerId(ownerId);
         LocalDateTime now = LocalDateTime.now();
-        Pageable pageable = PageRequest.of(from/size, size, Sort.by("created"));
+        Pageable pageable = PageRequest.of(from/size, size, Sort.by("start"));
 
         if (items == null || items.size() == 0) {
             return new ArrayList<>();
@@ -66,27 +74,33 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case PAST:
-                return bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByCreatedDesc(ownerId, now, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(ownerId, now, pageable));
             case WAITING:
-                return bookingRepository.findByItemOwnerIdAndStatusOrderByCreatedDesc(ownerId, BookingStatus.WAITING, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING, pageable));
             case FUTURE:
-                return bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByCreatedDesc(ownerId, now, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findAllByItemOwnerIdAndStartAfterOrderByStartDesc(ownerId, now, pageable));
             case REJECTED:
-                return bookingRepository.findByItemOwnerIdAndStatusOrderByCreatedDesc(ownerId, BookingStatus.REJECTED, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.REJECTED, pageable));
             case CURRENT:
-                return bookingRepository.findAllCurrentBookings(ownerId, now, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .findAllCurrentBookings(ownerId, now, pageable));
             default:
-                return bookingRepository.getBookingsByItemOwnerIdOrderByCreatedDesc(ownerId, pageable);
+                return bookingMapper.toBookingUpdDtoList(bookingRepository
+                        .getBookingsByItemOwnerIdOrderByStartDesc(ownerId, pageable));
         }
     }
 
     @Override
-    public Booking getBookingById(long bookingId, long userId) {
+    public BookingUpdDto getBookingById(long bookingId, long userId) {
         Optional<Booking> booking = bookingRepository.findById(bookingId);
 
         if (booking.isPresent()) {
             if (booking.get().getBooker().getId() == userId || booking.get().getItem().getOwnerId() == userId) {
-                return booking.get();
+                return bookingMapper.toBookingUpdDto(booking.get());
             } else throw new BookingNotFoundException("Бронирование не найдено");
         } else {
             throw new BookingNotFoundException("Бронирование не найдено");
@@ -94,7 +108,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingUpdDto create(Booking booking) {
+    public BookingUpdDto create(BookingCreateDto bookingDto, long userId) {
+        Booking booking = bookingMapper.toBookingFromCreatedDto(bookingDto, userId);
         Optional<Item> item = itemRepository.findById(booking.getItem().getId());
 
         if (item.isPresent() && item.get().getAvailable()) {
@@ -115,7 +130,14 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingUpdDto update(boolean approved, long bookingId, long userId) {
-        Booking booking = getBookingById(bookingId, userId);
+        Booking booking;
+        Optional<Booking> bookingOptional = bookingRepository.findById(bookingId);
+
+        if(bookingOptional.isPresent()) {
+            booking = bookingOptional.get();
+        } else {
+            throw new BookingNotFoundException("бронирование не найдено");
+        }
 
         if (userId != booking.getItem().getOwnerId()) {
             throw new BookingNotFoundException("Недостаточно прав для просмотра бронирования");

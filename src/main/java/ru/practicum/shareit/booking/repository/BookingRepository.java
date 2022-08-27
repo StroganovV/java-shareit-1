@@ -14,23 +14,23 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // *** запросы в разных вариантах для тренировки ***
 
-    List<Booking> findByBookerIdOrderByCreatedDesc(Long bookerId, Pageable pageable);
+    List<Booking> findByBookerIdOrderByStartDesc(Long bookerId, Pageable pageable);
 
-    List<Booking> findByBookerIdAndEndBeforeOrderByCreatedDesc(Long bookerId, LocalDateTime now, Pageable pageable);
+    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(Long bookerId, LocalDateTime now, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStatusOrderByCreatedDesc(Long bookerId, BookingStatus status, Pageable pageable);
+    List<Booking> findByBookerIdAndStatusOrderByStartDesc(Long bookerId, BookingStatus status, Pageable pageable);
 
     @Query("SELECT b FROM Booking b " +
             "WHERE b.booker.id = ?1  " +
             "AND b.start < ?2 " +
             "AND b.end > ?2 " +
-            "ORDER BY b.created DESC")
+            "ORDER BY b.start DESC")
     List<Booking> getCurrentBookings(Long bookerId, LocalDateTime now, Pageable pageable);
 
     @Query("SELECT b FROM Booking b " +
             "WHERE b.booker.id = ?1  " +
             "AND b.start > ?2 " +
-            "ORDER BY b.created DESC")
+            "ORDER BY b.start DESC")
     List<Booking> getFutureBookings(Long bookerId, LocalDateTime now, Pageable pageable);
 
     @Query("SELECT b FROM Booking b " +
@@ -38,18 +38,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "WHERE i.ownerId = ?1 " +
             "AND b.start < ?2 " +
             "AND b.end > ?2 " +
-            "ORDER BY b.created DESC")
+            "ORDER BY b.start DESC")
     List<Booking> findAllCurrentBookings(long ownerId, LocalDateTime now, Pageable pageable);
 
-    List<Booking> getBookingsByItemOwnerIdOrderByCreatedDesc(long ownerId, Pageable pageable);
+    List<Booking> getBookingsByItemOwnerIdOrderByStartDesc(long ownerId, Pageable pageable);
 
-    List<Booking> findAllByItemOwnerIdAndStartAfterOrderByCreatedDesc(long ownerId, LocalDateTime now, Pageable pageable);
+    List<Booking> findAllByItemOwnerIdAndStartAfterOrderByStartDesc(long ownerId, LocalDateTime now, Pageable pageable);
 
-    List<Booking> findAllByItemOwnerIdAndEndBeforeOrderByCreatedDesc(long ownerId, LocalDateTime now, Pageable pageable);
+    List<Booking> findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(long ownerId, LocalDateTime now, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndStatusOrderByCreatedDesc(long ownerId, BookingStatus status, Pageable pageable);
+    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(long ownerId, BookingStatus status, Pageable pageable);
 
-    List<Booking> getAllByItemIdOrderByCreatedDesc(long itemID);
+    List<Booking> getAllByItemIdOrderByStartDesc(long itemID);
 
     Optional<Booking> findByBookerIdAndItemIdAndEndBefore(long bookerId, Long item_id, LocalDateTime end);
 }

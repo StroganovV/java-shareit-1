@@ -24,7 +24,7 @@ public class BookingController {
     @PostMapping
     public BookingUpdDto create(@Valid @RequestBody BookingCreateDto bookingCreateDto,
                                 @RequestHeader(Constants.USER_ID_HEADER) long userId) {
-        return bookingService.create(bookingMapper.toBookingFromCreatedDto(bookingCreateDto, userId));
+        return bookingService.create(bookingCreateDto, userId);
     }
 
     @PatchMapping("/{bookingId}")
@@ -37,7 +37,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingUpdDto get(@PathVariable long bookingId,
                              @RequestHeader(Constants.USER_ID_HEADER) long userId) {
-        return bookingMapper.toBookingUpdDto(bookingService.getBookingById(bookingId, userId));
+        return bookingService.getBookingById(bookingId, userId);
     }
 
     @GetMapping
@@ -49,9 +49,7 @@ public class BookingController {
             throw new BadRequestException("некорректное значение страницы");
         }
 
-        return bookingService.getAllByBookerId(state, userId, from, size).stream()
-                .map(bookingMapper::toBookingUpdDto)
-                .collect(Collectors.toList());
+        return bookingService.getAllByBookerId(state, userId, from, size);
     }
 
     @GetMapping("/owner")
@@ -63,9 +61,7 @@ public class BookingController {
             throw new BadRequestException("некорректное значение страницы");
         }
 
-        return bookingService.getAllWhereOwnerOfItems(state, ownerId, from, size).stream()
-                .map(bookingMapper::toBookingUpdDto)
-                .collect(Collectors.toList());
+        return bookingService.getAllWhereOwnerOfItems(state, ownerId, from, size);
     }
 
 
