@@ -3,18 +3,15 @@ package ru.practicum.shareit.item.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Constants;
-import ru.practicum.shareit.exceptions.IncorrectItemException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemMapper;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
@@ -24,14 +21,8 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(@RequestHeader(Constants.USER_ID_HEADER) long userId,
-                          @Valid @RequestBody ItemDto itemDto) {
-        if (itemDto.getName() == null || itemDto.getName().isBlank() || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new IncorrectItemException("Имя или описание заполнены неправильно");
-        }
+                          @RequestBody ItemDto itemDto) {
 
-        if (itemDto.getAvailable() == null) {
-            throw new IncorrectItemException("Не заполнено поле доступности вещи");
-        }
         return itemServiceImpl.create(userId, itemDto);
     }
 

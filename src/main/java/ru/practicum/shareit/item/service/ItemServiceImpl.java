@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingMapper;
+import ru.practicum.shareit.exceptions.IncorrectItemException;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.NotAvailableException;
 import ru.practicum.shareit.exceptions.NotOwnerException;
@@ -39,6 +40,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(long userId, ItemDto itemDto) {
+        if (itemDto.getName() == null || itemDto.getName().isBlank() || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            throw new IncorrectItemException("Имя или описание заполнены неправильно");
+        }
+
+        if (itemDto.getAvailable() == null) {
+            throw new IncorrectItemException("Не заполнено поле доступности вещи");
+        }
         Item item = ItemMapper.toItem(itemDto);
         userService.getUserById(userId);
         item.setOwnerId(userId);
