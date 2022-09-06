@@ -1,11 +1,15 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingMapper;
+import ru.practicum.shareit.exceptions.IncorrectItemException;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.NotAvailableException;
 import ru.practicum.shareit.exceptions.NotOwnerException;
@@ -35,10 +39,18 @@ public class ItemServiceImpl implements ItemService {
     private BookingMapper bookingMapper;
 
     @Override
-    public Item create(long userId, Item item) {
+    public ItemDto create(long userId, ItemDto itemDto) {
+        if (itemDto.getName() == null || itemDto.getName().isBlank() || itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            throw new IncorrectItemException("Имя или описание заполнены неправильно");
+        }
+
+        if (itemDto.getAvailable() == null) {
+            throw new IncorrectItemException("Не заполнено поле доступности вещи");
+        }
+        Item item = ItemMapper.toItem(itemDto);
         userService.getUserById(userId);
         item.setOwnerId(userId);
-        return itemRepository.save(item);
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override
@@ -88,8 +100,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemBookingDto> getAllUsersItems(long userId) {
-        return itemRepository.getAllByOwnerId(userId)
+    public List<ItemBookingDto> getAllUsersItems(long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
+        return itemRepository.getAllByOwnerId(userId, pageable)
                 .stream()
                 .map(i -> getItemBookingDtoWithBookingsAndComments(i, userId))
                 .sorted(Comparator.comparing(ItemBookingDto::getId))
@@ -97,13 +110,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> search(String text) { //Поиск вещи по наличию текста в имени или описании
-        return itemRepository.search(text);
+    public List<ItemDto> search(String text, int from, int size) {
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id"));//Поиск вещи по наличию текста в имени или описании
+        return itemRepository.search(text, pageable).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
     private ItemBookingDto getItemBookingDtoWithBookingsAndComments(Item item, long userId) {
         ItemBookingDto getDto = ItemMapper.toItemBookingDto(item);
-        List<Booking> bookings = bookingRepository.getAllByItemIdOrderByCreatedDateDesc(item.getId());
+        List<Booking> bookings = bookingRepository.getAllByItemIdOrderByStartDesc(item.getId());
         if (bookings != null && bookings.size() > 0) {
             if (item.getOwnerId() == userId) {
                 getDto.setLastBooking(bookingMapper.toBookingDto(bookings.get(bookings.size() - 1)));

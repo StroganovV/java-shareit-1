@@ -16,4 +16,9 @@ public class ItemBookingDto {
     private BookingDto lastBooking;
     private BookingDto nextBooking;
     private List<CommentDto> comments;
+
+    public ItemBookingDto(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

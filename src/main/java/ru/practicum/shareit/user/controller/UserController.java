@@ -16,31 +16,32 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserController {
     private UserService userService;
+    private UserMapper userMapper;
 
     @GetMapping
     public Collection<UserDto> getAll() {
         return userService.getAll().stream()
-                .map(UserMapper::toUserDto)
+                .map(userMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{userId}")
     public UserDto get(@PathVariable long userId) {
-        return UserMapper.toUserDto(userService.getUserById(userId));
+        return userMapper.toUserDto(userService.getUserById(userId));
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(@RequestBody UserDto userDto,
                           @PathVariable long userId) {
-        return UserMapper.toUserDto(userService.update(UserMapper.toUser(userDto), userId));
+        return userMapper.toUserDto(userService.update(userDto, userId));
     }
 
     @PostMapping
     public UserDto create(@Valid @RequestBody UserDto userDto) {
         if (userDto.getEmail() == null || userDto.getName() == null) {
-            throw new IncorrectUserException("Некорректно заполно имя или email");
+            throw new IncorrectUserException("Некорректно заполнено имя или email");
         }
-        return UserMapper.toUserDto(userService.create(UserMapper.toUser(userDto)));
+        return userMapper.toUserDto(userService.create(userMapper.toUser(userDto)));
     }
 
     @DeleteMapping("/{userId}")

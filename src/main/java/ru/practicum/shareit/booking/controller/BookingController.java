@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingUpdDto;
 import ru.practicum.shareit.booking.model.StateEnum;
 import ru.practicum.shareit.booking.service.BookingMapper;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.BadRequestException;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -23,7 +24,7 @@ public class BookingController {
     @PostMapping
     public BookingUpdDto create(@Valid @RequestBody BookingCreateDto bookingCreateDto,
                                 @RequestHeader(Constants.USER_ID_HEADER) long userId) {
-        return bookingService.create(bookingMapper.toBookingFromCreatedDto(bookingCreateDto, userId));
+        return bookingService.create(bookingCreateDto, userId);
     }
 
     @PatchMapping("/{bookingId}")
@@ -36,24 +37,31 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingUpdDto get(@PathVariable long bookingId,
                              @RequestHeader(Constants.USER_ID_HEADER) long userId) {
-        return bookingMapper.toBookingUpdDto(bookingService.getBookingById(bookingId, userId));
+        return bookingService.getBookingById(bookingId, userId);
     }
 
     @GetMapping
     public Collection<BookingUpdDto> getAll(@RequestParam(value = "state", required = false, defaultValue = "ALL") StateEnum state,
-                                            @RequestHeader(Constants.USER_ID_HEADER) long userId) {
+                                            @RequestHeader(Constants.USER_ID_HEADER) long userId,
+                                            @RequestParam(defaultValue = "0") int from,
+                                            @RequestParam(defaultValue = "25") int size) {
+        if(from < 0 || size < 0) {
+            throw new BadRequestException("некорректное значение страницы");
+        }
 
-        return bookingService.getAllByBookerId(state, userId).stream()
-                .map(bookingMapper::toBookingUpdDto)
-                .collect(Collectors.toList());
+        return bookingService.getAllByBookerId(state, userId, from, size);
     }
 
     @GetMapping("/owner")
     public Collection<BookingUpdDto> getAllWhereOwnerOfItems(@RequestParam(value = "state", required = false, defaultValue = "ALL") StateEnum state,
-                                                             @RequestHeader(Constants.USER_ID_HEADER) long ownerId) {
-        return bookingService.getAllWhereOwnerOfItems(state, ownerId).stream()
-                .map(bookingMapper::toBookingUpdDto)
-                .collect(Collectors.toList());
+                                                             @RequestHeader(Constants.USER_ID_HEADER) long ownerId,
+                                                             @RequestParam(defaultValue = "0") int from,
+                                                             @RequestParam(defaultValue = "25") int size) {
+        if(from < 0 || size < 0) {
+            throw new BadRequestException("некорректное значение страницы");
+        }
+
+        return bookingService.getAllWhereOwnerOfItems(state, ownerId, from, size);
     }
 
 

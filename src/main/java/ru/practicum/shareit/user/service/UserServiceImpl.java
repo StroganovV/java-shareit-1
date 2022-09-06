@@ -1,8 +1,10 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -10,13 +12,12 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private UserRepository userRepository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private UserMapper userMapper;
 
     @Override
     public User getUserById(long userId) {
@@ -29,7 +30,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(User user, long userId) {
+    public User update(UserDto dto, long userId) {
+        User user = userMapper.toUser(dto);
         Optional<User> userData = userRepository.findById(userId);
         if (userData.isPresent()) {
             User userUpd = userData.get();

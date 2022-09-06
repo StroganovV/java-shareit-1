@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
 import ru.practicum.shareit.item.model.Item;
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "bookings")
 public class Booking {
 
@@ -30,6 +34,6 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Type(type = "ru.practicum.shareit.booking.model.EnumTypePostgreSql")
     private BookingStatus status;
-    @Column(name = "created_date")
-    private LocalDateTime createdDate;
+    @Column(name = "created")
+    private LocalDateTime created;
 }
